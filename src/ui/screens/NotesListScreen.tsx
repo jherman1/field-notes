@@ -6,6 +6,7 @@ import { useNotesStore } from "../../state/notesStore";
 import NoteRow from "../components/NoteRow";
 import SearchBar from "../components/SearchBar";
 import TagChips from "../components/TagChips";
+import { useDebouncedValue } from "../hooks/useDebouncedValue";
 
 function normalizeText(s: string) {
     return s.trim().toLowerCase();
@@ -28,8 +29,10 @@ export default function NotesListScreen() {
             }))
         );
 
+    const debouncedQuery = useDebouncedValue(query, 250);
+
     const notes = useMemo(() => {
-        const q = normalizeText(query);
+        const q = normalizeText(debouncedQuery);
 
         const all = noteIds
             .map((id) => notesById[id])
@@ -48,7 +51,7 @@ export default function NotesListScreen() {
             const hay = normalizeText(`${n.title} ${n.body} ${n.tags.join(" ")}`);
             return hay.includes(q);
         });
-    }, [noteIds, notesById, query, tagFilter]);
+    }, [noteIds, notesById, debouncedQuery, tagFilter]);
 
     const tags = useMemo(() => {
         const set = new Set<string>();
